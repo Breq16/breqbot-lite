@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask
+from flask import Flask, redirect
 from flask_discord_interactions import DiscordInteractions
 
 
@@ -20,6 +20,11 @@ def ping(ctx):
 
 
 discord.set_route("/interactions")
+
+
+@app.route("/")
+def index():
+    return redirect(os.environ["OAUTH_URL"])
 
 
 discord.clear_slash_commands(guild_id=os.environ["TESTING_GUILD"])
