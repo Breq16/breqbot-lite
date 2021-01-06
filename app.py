@@ -3,6 +3,8 @@ import os
 from flask import Flask, redirect
 from flask_discord_interactions import DiscordInteractions
 
+import reddit
+
 
 app = Flask(__name__)
 discord = DiscordInteractions(app)
@@ -26,6 +28,8 @@ discord.set_route("/interactions")
 def index():
     return redirect(os.environ["OAUTH_URL"])
 
+
+discord.register_blueprint(reddit.bp)
 
 discord.clear_slash_commands(guild_id=os.environ["TESTING_GUILD"])
 discord.clear_slash_commands()
