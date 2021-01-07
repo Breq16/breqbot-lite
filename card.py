@@ -1,10 +1,12 @@
 import os
+import threading
 
 import requests
 import redis
 
 from flask_discord_interactions import (DiscordInteractionsBlueprint,
-                                        InteractionResponse)
+                                        InteractionResponse,
+                                        CommandOptionType)
 
 bp = DiscordInteractionsBlueprint()
 
@@ -58,3 +60,27 @@ def card(ctx):
     return InteractionResponse(embed={
         "image": {"url": get_card(ctx)}
     })
+
+
+@bp.command(options=[
+    {
+        "name": "field",
+        "description": "Field to set on your card",
+        "type": CommandOptionType.STRING,
+        "required": True,
+        "choices": [{"name": name, "value": name} for name in fields]
+    },
+    {
+        "name": "value",
+        "description": "Value to set the field to",
+        "type": CommandOptionType.STRING,
+        "required": True,
+    }
+])
+def setcard(ctx, field, value):
+    "Set an attribute of a card"
+    db.hset(f"card:{ctx.author.id}:params", field, value)
+
+    freeze_thread = threading.Thread(target=freeze_card, args=(ctx,))
+    freeze_thread.start()
+    return ":white_check_mark:"
