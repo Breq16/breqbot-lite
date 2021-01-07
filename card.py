@@ -99,6 +99,6 @@ def setcard(ctx, **kwargs):
     for field, value in kwargs.items():
         db.hset(f"card:{ctx.author.id}:params", field, value)
 
-    freeze_thread = threading.Thread(target=freeze_card, args=(ctx,))
+    freeze_thread = threading.Thread(target=freeze_card, args=(ctx.author,))
     freeze_thread.start()
     return ":white_check_mark:"
