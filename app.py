@@ -4,6 +4,7 @@ from flask import Flask, redirect
 from flask_discord_interactions import DiscordInteractions
 
 import reddit
+import card
 
 
 app = Flask(__name__)
@@ -30,11 +31,10 @@ def index():
 
 
 discord.register_blueprint(reddit.bp)
+discord.register_blueprint(card.bp)
 
-discord.clear_slash_commands(guild_id=os.environ["TESTING_GUILD"])
-discord.clear_slash_commands()
-discord.register_slash_commands(guild_id=os.environ["TESTING_GUILD"])
-discord.register_slash_commands()
+discord.update_slash_commands(guild_id=os.environ["TESTING_GUILD"])
+discord.update_slash_commands()
 
 
 if __name__ == '__main__':
