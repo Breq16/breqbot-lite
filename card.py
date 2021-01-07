@@ -62,24 +62,21 @@ def card(ctx):
     })
 
 
-@bp.command(options=[
-    {
-        "name": "field",
-        "description": "Field to set on your card",
+set_options = []
+for name, description in fields.items():
+    set_options.append({
+        "name": name,
+        "description": description,
         "type": CommandOptionType.STRING,
-        "required": True,
-        "choices": [{"name": name, "value": name} for name in fields]
-    },
-    {
-        "name": "value",
-        "description": "Value to set the field to",
-        "type": CommandOptionType.STRING,
-        "required": True,
-    }
-])
-def setcard(ctx, field, value):
+        "required": False
+    })
+
+
+@bp.command(options=set_options)
+def setcard(ctx, **kwargs):
     "Set an attribute of a card"
-    db.hset(f"card:{ctx.author.id}:params", field, value)
+    for field, value in kwargs.items():
+        db.hset(f"card:{ctx.author.id}:params", field, value)
 
     freeze_thread = threading.Thread(target=freeze_card, args=(ctx,))
     freeze_thread.start()
