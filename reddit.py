@@ -9,9 +9,11 @@ bp = DiscordInteractionsBlueprint()
 
 def make_reddit_command(endpoint, info):
     if len(endpoint) < 3:
-        endpoint += "_"*(3-len(endpoint))
+        name = endpoint + "_"*(3-len(endpoint))
+    else:
+        name = endpoint
 
-    @bp.command(name=endpoint, description=info["desc"])
+    @bp.command(name=name, description=info["desc"])
     def _reddit_command(ctx):
         result = requests.get(f"https://redditor.breq.dev/{endpoint}").json()
         return InteractionResponse(embed={
