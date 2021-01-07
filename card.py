@@ -26,40 +26,61 @@ defaults = {
 }
 
 
-def freeze_card(ctx):
+def freeze_card(user):
     params = {
-        field: (db.hget(f"card:{ctx.author.id}:params", field)
+        field: (db.hget(f"card:{user.id}:params", field)
                 or defaults[field])
         for field in fields
     }
 
-    params["name"] = ctx.author.display_name
-    params["avatar"] = ctx.author.avatar_url
+    params["name"] = user.display_name
+    params["avatar"] = user.avatar_url
 
     response = requests.post("https://cards.breq.dev/card", params=params)
     response.raise_for_status()
 
     card_id = response.json()["card_id"]
 
-    db.set(f"card:{ctx.author.id}:id", card_id)
+    db.set(f"card:{user.id}:id", card_id)
 
     return card_id
 
 
-def get_card(ctx):
-    card_id = db.get(f"card:{ctx.author.id}:id")
+def get_card(user):
+    card_id = db.get(f"card:{user.id}:id")
     if not card_id:
-        card_id = freeze_card(ctx)
+        card_id = freeze_card(user)
 
     return f"https://cards.breq.dev/card/{card_id}.png"
 
 
-@bp.command()
-def card(ctx):
+def get_card_by_id(user_id):
+    card_id = db.get(f"card:{user_id}:id")
+
+    if card_id:
+        return f"https://cards.breq.dev/card/{card_id}.png"
+    else:
+        return None
+
+
+@bp.command(options=[{
+    "name": "member",
+    "description": "Member to get the card from (defaults to yourself).",
+    "type": CommandOptionType.USER,
+    "required": False
+}])
+def card(ctx, member=None):
     "Return the card of a user"
-    return InteractionResponse(embed={
-        "image": {"url": get_card(ctx)}
-    })
+
+    if member is None:
+        return InteractionResponse(
+            embed={"image": {"url": get_card(ctx.author)}})
+    else:
+        card_url = get_card_by_id(member)
+        if card_url:
+            return InteractionResponse(embed={"image": {"url": card_url}})
+        else:
+            return "That user has not set their card with `/setcard`."
 
 
 set_options = []
