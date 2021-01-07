@@ -15,7 +15,9 @@ def make_reddit_command(endpoint, info):
 
     @bp.command(name=name, description=info["desc"])
     def _reddit_command(ctx):
-        result = requests.get(f"https://redditor.breq.dev/{endpoint}").json()
+        result = requests.get(
+            f"https://redditor.breq.dev/{endpoint}",
+            params={"channel": f"breqbot:{ctx.channel_id}"}).json()
         return InteractionResponse(embed={
             "title": result["title"],
             "url": result["url"],
